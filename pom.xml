@@ -162,8 +162,8 @@
 							</inputSpec>
 							<openapiNormalizer>REF_AS_PARENT_IN_ALLOF=true</openapiNormalizer>
 							<generatorName>spring</generatorName>
-							<apiPackage>com.easyshop.catalogservice.generated.api</apiPackage>
-							<modelPackage>com.easyshop.catalogservice.generated.model</modelPackage>
+							<apiPackage>com.easyshop.catalog-service.generated.api</apiPackage>
+							<modelPackage>com.easyshop.catalog-service.generated.model</modelPackage>
 							<schemaMappings>
 								ProblemDetail=org.springframework.http.ProblemDetail,
 							</schemaMappings>
