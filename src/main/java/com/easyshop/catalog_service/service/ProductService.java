@@ -1,6 +1,8 @@
 package com.easyshop.catalog_service.service;
 
 import com.easyshop.catalog_service.exception.ProductAlreadyExistsException;
+import com.easyshop.catalog_service.exception.ProductNotFoundException;
+import com.easyshop.catalog_service.generated.model.ProductResponse;
 import com.easyshop.catalog_service.model.ProductPageResponse;
 import com.easyshop.catalog_service.generated.model.ProductRequest;
 import com.easyshop.catalog_service.mapper.ProductMapper;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import reactor.core.publisher.Mono;
+
+import java.awt.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -53,6 +57,12 @@ public class ProductService {
                 .map(productMapper::toProductResponse)
                 .zipWhen(productResponses -> productRepository.count())
                 .map(productResponsesWithCount -> new ProductPageResponse(productResponsesWithCount.getT1(), pageable, productResponsesWithCount.getT2()));
+    }
+
+    public Mono<ProductResponse> findByCode(String code) {
+        return productRepository.findByCode(code)
+                .switchIfEmpty(Mono.error(new ProductNotFoundException(code)))
+                .map(productMapper::toResponse);
     }
 
 

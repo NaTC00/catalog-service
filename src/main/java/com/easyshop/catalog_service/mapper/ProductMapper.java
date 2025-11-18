@@ -11,6 +11,8 @@ import java.util.List;
 public interface ProductMapper {
     ProductEntity toEntity(ProductRequest productRequest);
 
+    ProductResponse toResponse(ProductEntity productEntity);
+
     List<ProductResponse> toProductResponse(List<ProductEntity> productEntities);
 
     ProductPageResponse toProductPageResponse(com.easyshop.catalog_service.model.ProductPageResponse productPageResponses);

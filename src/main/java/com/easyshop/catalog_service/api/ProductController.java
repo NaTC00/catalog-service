@@ -3,6 +3,7 @@ package com.easyshop.catalog_service.api;
 import com.easyshop.catalog_service.generated.api.ProductApi;
 import com.easyshop.catalog_service.generated.model.ProductPageResponse;
 import com.easyshop.catalog_service.generated.model.ProductRequest;
+import com.easyshop.catalog_service.generated.model.ProductResponse;
 import com.easyshop.catalog_service.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,5 +33,11 @@ public class ProductController implements ProductApi {
         return productRequest
                 .flatMap(productService::addProduct)
                 .map(productCode -> ResponseEntity.created(URI.create(exchange.getRequest().getURI() + "/" + productCode)).build());
+    }
+
+    @Override
+    public Mono<ResponseEntity<ProductResponse>> findProductByCode(String productCode, ServerWebExchange exchange) {
+        return  productService.findByCode(productCode)
+                .map(ResponseEntity::ok);
     }
 }
