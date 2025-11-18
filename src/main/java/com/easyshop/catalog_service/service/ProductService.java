@@ -1,6 +1,7 @@
 package com.easyshop.catalog_service.service;
 
 import com.easyshop.catalog_service.exception.ProductAlreadyExistsException;
+import com.easyshop.catalog_service.model.ProductPageResponse;
 import com.easyshop.catalog_service.generated.model.ProductRequest;
 import com.easyshop.catalog_service.mapper.ProductMapper;
 import com.easyshop.catalog_service.middleware.db.entity.ProductEntity;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,5 +38,22 @@ public class ProductService {
                 .onErrorResume(DuplicateKeyException.class, e -> Mono.error(new ProductAlreadyExistsException(productEntity.code())));
 
     }
+
+   public Mono<com.easyshop.catalog_service.generated.model.ProductPageResponse> getProducts(int pageNumber, int size){
+        return findAll(pageNumber, size)
+                .map(productMapper::toProductPageResponse);
+    }
+
+    private Mono<ProductPageResponse> findAll(int pageNumber, int size) {
+        log.info("pageNumber: {}, size: {}", pageNumber, size);
+        final Pageable pageable = PageRequest.of(pageNumber, size);
+        return productRepository.findAllBy(pageable)
+                .collectList()
+                .doOnNext(productEntities -> log.info("retrieved products: {}", productEntities))
+                .map(productMapper::toProductResponse)
+                .zipWhen(productResponses -> productRepository.count())
+                .map(productResponsesWithCount -> new ProductPageResponse(productResponsesWithCount.getT1(), pageable, productResponsesWithCount.getT2()));
+    }
+
 
 }

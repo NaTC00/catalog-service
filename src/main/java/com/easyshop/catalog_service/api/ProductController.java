@@ -1,6 +1,7 @@
 package com.easyshop.catalog_service.api;
 
 import com.easyshop.catalog_service.generated.api.ProductApi;
+import com.easyshop.catalog_service.generated.model.ProductPageResponse;
 import com.easyshop.catalog_service.generated.model.ProductRequest;
 import com.easyshop.catalog_service.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,13 @@ import java.net.URI;
 public class ProductController implements ProductApi {
 
     private final ProductService productService;
+
+   @Override
+    public Mono<ResponseEntity<ProductPageResponse>> findProducts(Integer page, Integer size, ServerWebExchange exchange) {
+        return productService.getProducts(page, size)
+                .map(ResponseEntity::ok);
+
+    }
 
     @Override
     public Mono<ResponseEntity<Void>> addProduct(Mono<ProductRequest> productRequest, ServerWebExchange exchange) {
