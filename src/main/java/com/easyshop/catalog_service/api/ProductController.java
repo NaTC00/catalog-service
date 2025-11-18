@@ -40,4 +40,10 @@ public class ProductController implements ProductApi {
         return  productService.findByCode(productCode)
                 .map(ResponseEntity::ok);
     }
+
+    @Override
+    public Mono<ResponseEntity<Void>> deleteProduct(String productCode, ServerWebExchange exchange) {
+       return productService.deleteByCode(productCode)
+               .then(Mono.just(ResponseEntity.noContent().build()));
+    }
 }

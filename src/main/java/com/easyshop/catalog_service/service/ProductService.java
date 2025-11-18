@@ -65,5 +65,12 @@ public class ProductService {
                 .map(productMapper::toResponse);
     }
 
+    @Transactional
+    public Mono<Void> deleteByCode(String code) {
+        return productRepository.findByCode(code)
+                .switchIfEmpty(Mono.error(new ProductNotFoundException(code)))
+                .flatMap(productEntity -> productRepository.deleteById(productEntity.productId()));
+    }
+
 
 }

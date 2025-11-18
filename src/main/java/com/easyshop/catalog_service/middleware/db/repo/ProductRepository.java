@@ -10,4 +10,5 @@ public interface ProductRepository extends R2dbcRepository<ProductEntity, Long> 
     Flux<ProductEntity> findAllBy(Pageable pageable);
 
     Mono<ProductEntity> findByCode(String code);
+
 }
