@@ -178,7 +178,7 @@ components:
         name:
           type: string
           example: Product Name
-        #          format: password
+          format: password #to hide the name in logging
         category:
           $ref: '#/components/schemas/ProductCategory'
         price:
