@@ -11,6 +11,8 @@ import java.util.List;
 public interface ProductMapper {
     ProductEntity toEntity(ProductRequest productRequest);
 
+    ProductEntity toEntity(ProductRequest productRequest, Long productId);
+
     ProductResponse toResponse(ProductEntity productEntity);
 
     List<ProductResponse> toProductResponse(List<ProductEntity> productEntities);

@@ -21,9 +21,16 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ProductNotFoundException.class)
-    public Mono<ResponseEntity<Object>> handle(Exception ex, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Object>> handle(ProductNotFoundException ex, ServerWebExchange exchange) {
         logger.warn(ex.getMessage());
         var pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         return Mono.just(new ResponseEntity<>(pd, HttpStatus.NOT_FOUND));
+    }
+
+    @ExceptionHandler(ProductCodeMismatchException.class)
+    public Mono<ResponseEntity<Object>> handle(ProductCodeMismatchException ex, ServerWebExchange exchange) {
+        logger.warn(ex.getMessage());
+        var pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        return Mono.just(new ResponseEntity<>(pd, HttpStatus.BAD_REQUEST));
     }
 }

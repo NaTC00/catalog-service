@@ -1,6 +1,7 @@
 package com.easyshop.catalog_service.service;
 
 import com.easyshop.catalog_service.exception.ProductAlreadyExistsException;
+import com.easyshop.catalog_service.exception.ProductCodeMismatchException;
 import com.easyshop.catalog_service.exception.ProductNotFoundException;
 import com.easyshop.catalog_service.generated.model.ProductResponse;
 import com.easyshop.catalog_service.model.ProductPageResponse;
@@ -8,6 +9,7 @@ import com.easyshop.catalog_service.generated.model.ProductRequest;
 import com.easyshop.catalog_service.mapper.ProductMapper;
 import com.easyshop.catalog_service.middleware.db.entity.ProductEntity;
 import com.easyshop.catalog_service.middleware.db.repo.ProductRepository;
+import com.easyshop.catalog_service.model.PutProduct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,8 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import reactor.core.publisher.Mono;
-
-import java.awt.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -41,6 +41,21 @@ public class ProductService {
                 .doOnNext(entitySaved -> log.info("Saved product : {}", entitySaved))
                 .onErrorResume(DuplicateKeyException.class, e -> Mono.error(new ProductAlreadyExistsException(productEntity.code())));
 
+    }
+
+    @Transactional
+    public Mono<PutProduct> editByCode(String prductCode, ProductRequest productRequest) {
+        if (!prductCode.equals(productRequest.getCode())) {
+            return Mono.error(new ProductCodeMismatchException());
+        }
+
+        return productRepository.findByCode(prductCode)
+                .switchIfEmpty(Mono.error(new ProductNotFoundException(prductCode)))
+                .map(productEntity -> productMapper.toEntity(productRequest, productEntity.productId()))
+                .flatMap(productRepository::save)
+                .map(productMapper::toResponse)
+                .map(productResponse -> new PutProduct(productResponse, false))
+                .onErrorResume(ProductNotFoundException.class, e -> insertProduct(productRequest).map(code -> new PutProduct(null, true)));
     }
 
    public Mono<com.easyshop.catalog_service.generated.model.ProductPageResponse> getProducts(int pageNumber, int size){
@@ -71,6 +86,8 @@ public class ProductService {
                 .switchIfEmpty(Mono.error(new ProductNotFoundException(code)))
                 .flatMap(productEntity -> productRepository.deleteById(productEntity.productId()));
     }
+
+
 
 
 }

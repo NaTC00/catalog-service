@@ -46,4 +46,17 @@ public class ProductController implements ProductApi {
        return productService.deleteByCode(productCode)
                .then(Mono.just(ResponseEntity.noContent().build()));
     }
+
+    @Override
+    public Mono<ResponseEntity<ProductResponse>> editProduct(String productCode, Mono<ProductRequest> productRequest, ServerWebExchange exchange) {
+        return productRequest
+                .flatMap(request -> productService.editByCode(productCode, request))
+                .map(putProduct -> {
+                    if (putProduct.newProduct()) {
+                        return ResponseEntity.created(exchange.getRequest().getURI()).build();
+
+                    }
+                    return ResponseEntity.ok((putProduct.productResponse()));
+                });
+    }
 }
