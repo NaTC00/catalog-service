@@ -5,11 +5,13 @@ import com.easyshop.catalog_service.generated.model.ProductRequest;
 import com.easyshop.catalog_service.mapper.ProductMapper;
 import com.easyshop.catalog_service.middleware.db.entity.ProductEntity;
 import com.easyshop.catalog_service.middleware.db.repo.ProductRepository;
+import com.easyshop.catalog_service.model.ProductPageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.dao.DuplicateKeyException;
 
@@ -35,4 +37,5 @@ public class ProductHandler {
                 .doOnNext(entitySaved -> log.debug("Product saved : {}", entitySaved))
                 .onErrorResume(DuplicateKeyException.class, ex -> Mono.error(new ProductAlreadyExistsException(productEntity.code())));
     }
+
 }
