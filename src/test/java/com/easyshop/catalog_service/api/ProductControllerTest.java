@@ -118,4 +118,22 @@ public class ProductControllerTest {
                 .expectBody(ProductResponse.class)
                 .consumeWith(result -> assertThat(result.getResponseBody()).isEqualTo(responseExpected));
     }
+
+    @Test
+    public void editProductOk201Test(){
+        var request = new ProductRequest()
+                .code("code1")
+                .category(ProductCategory.LAPTOP)
+                .price(1000L);
+
+        when(productService.editByCode("code1", request)).thenReturn(Mono.just(new PutProduct(null, true)));
+
+        webTestClient.put()
+                .uri("/products/code1")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(Void.class)
+                .consumeWith(result -> assertThat(result.getResponseHeaders().get("Location").get(0)).isEqualTo("/products/code1"));
+    }
 }
