@@ -5,6 +5,7 @@ import com.easyshop.catalog_service.exception.ProductNotFoundException;
 import com.easyshop.catalog_service.generated.model.ProductCategory;
 import com.easyshop.catalog_service.generated.model.ProductRequest;
 import com.easyshop.catalog_service.generated.model.ProductResponse;
+import com.easyshop.catalog_service.model.PutProduct;
 import com.easyshop.catalog_service.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,10 +90,32 @@ public class ProductControllerTest {
                 .category(ProductCategory.LAPTOP)
                 .price(1000L);
 
+
         webTestClient.post()
                 .uri("/products")
                 .bodyValue(request)
                 .exchange()
                 .expectStatus().isBadRequest();
+    }
+
+    @Test
+    public void editProductOk200Test(){
+        var request = new ProductRequest()
+                .code("code1")
+                .category(ProductCategory.LAPTOP)
+                .price(1000L);
+        var responseExpected = new ProductResponse()
+                .code("code1")
+                .category(ProductCategory.LAPTOP)
+                .price(1000L);
+        when(productService.editByCode("code1", request)).thenReturn(Mono.just(new PutProduct(responseExpected, false)));
+
+        webTestClient.put()
+                .uri("/products/code1")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponse.class)
+                .consumeWith(result -> assertThat(result.getResponseBody()).isEqualTo(responseExpected));
     }
 }
