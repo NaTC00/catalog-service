@@ -1,6 +1,9 @@
 package com.easyshop.catalog_service.api;
 
+import com.easyshop.catalog_service.exception.ProductAlreadyExistsException;
+import com.easyshop.catalog_service.exception.ProductNotFoundException;
 import com.easyshop.catalog_service.generated.model.ProductCategory;
+import com.easyshop.catalog_service.generated.model.ProductRequest;
 import com.easyshop.catalog_service.generated.model.ProductResponse;
 import com.easyshop.catalog_service.service.ProductService;
 import org.junit.jupiter.api.Test;
@@ -37,5 +40,46 @@ public class ProductControllerTest {
                 .expectBody(ProductResponse.class)
                 .consumeWith(result -> assertThat(result.getResponseBody()).isEqualTo(responseExpected));
 
+    }
+
+    @Test
+    public void findProductByCodeFailTest() {
+        when(productService.findByCode("code1")).thenReturn(Mono.error(new ProductNotFoundException("code1")));
+
+        webTestClient.get()
+                .uri("/products/code1")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    public void addProductOkTest() {
+        var request = new ProductRequest()
+                .code("code1")
+                .category(ProductCategory.LAPTOP)
+                .price(1000L);
+        when(productService.addProduct(request)).thenReturn(Mono.just("code1"));
+        webTestClient.post()
+                .uri("/products")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(Void.class)
+                .consumeWith(result -> assertThat(result.getResponseHeaders().get("Location").get(0)).isEqualTo("/products/code1"));
+    }
+
+    @Test
+    public void addProductFailTest() {
+        var request = new ProductRequest()
+                .code("code1")
+                .category(ProductCategory.LAPTOP)
+                .price(1000L);
+        when(productService.addProduct(request)).thenReturn(Mono.error(new ProductAlreadyExistsException(request.getCode())));
+
+        webTestClient.post()
+                .uri("/products")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 }
