@@ -82,4 +82,17 @@ public class ProductControllerTest {
                 .exchange()
                 .expectStatus().isBadRequest();
     }
+
+    @Test
+    public void addProductFailValidationTest() {
+        var request = new ProductRequest()
+                .category(ProductCategory.LAPTOP)
+                .price(1000L);
+
+        webTestClient.post()
+                .uri("/products")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 }
