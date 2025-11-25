@@ -1,6 +1,7 @@
 package com.easyshop.catalog_service.api;
 
 import com.easyshop.catalog_service.exception.ProductAlreadyExistsException;
+import com.easyshop.catalog_service.exception.ProductCodeMismatchException;
 import com.easyshop.catalog_service.exception.ProductNotFoundException;
 import com.easyshop.catalog_service.generated.model.ProductCategory;
 import com.easyshop.catalog_service.generated.model.ProductRequest;
@@ -135,5 +136,20 @@ public class ProductControllerTest {
                 .expectStatus().isCreated()
                 .expectBody(Void.class)
                 .consumeWith(result -> assertThat(result.getResponseHeaders().get("Location").get(0)).isEqualTo("/products/code1"));
+    }
+
+    @Test
+    public void editProductFailCodeMismatchTest() {
+        var request = new ProductRequest()
+                .code("code1")
+                .category(ProductCategory.LAPTOP)
+                .price(1000L);
+        when(productService.editByCode("code1", request)).thenReturn(Mono.error(new ProductCodeMismatchException()));
+
+        webTestClient.put()
+                .uri("/products/code1")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 }
